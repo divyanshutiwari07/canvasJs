@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>canvas Tutorial</title>
+    <link href='style.css' rel='stylesheet' media='all'>
+    <!-- <script src='test.js'></script> -->
+  </head>
+  <body>
+  <canvas id="myCanvas" width="800" height="600" style="border:1px solid #d3d3d3;">
+      
+  </canvas>
+  <button type="button" onclick="myFunction()">click</button>
+  <script>
+
+    var dragging = false,
+        dragStartLocation,
+        snapshot;
+
+     function myFunction() {
+      var canvas = document.getElementById('myCanvas');
+      var c = canvas.getContext('2d');
+
+      c.strokeStyle = 'purple';
+      c.lineWidth = 6;
+      c.lineCap = 'round';
+      
+      canvas.addEventListener('mousedown', dragStart, false);
+      canvas.addEventListener('mousemove', drag, false);
+      canvas.addEventListener('mouseup', dragStop, false);
+
+      function takeSnapshot(){
+        snapshot = c.getImageData(0,0, canvas.width, canvas.height);
+      }
+
+      function restoreSnapshot(){
+        c.putImageData(snapshot, 0, 0);
+      }
+
+      function drawLine(position) {
+        c.beginPath();
+        c.moveTo(dragStartLocation.x , dragStartLocation.y);
+        c.lineTo(position.x, position.y);
+        c.stroke();
+      }
+      
+      function dragStart(event) {
+        dragging = true;
+        dragStartLocation = getCanvasCoordinates(event);
+      }
+
+      function drag(event) {
+        var position;
+        if (dragging === true) {
+          restoreSnapshot();
+          position = getCanvasCoordinates(event);
+          drawLine(position);
+        }
+      }
+
+      function dragStop(event) {
+        dragging = false;
+        restoreSnapshot();
+        var position = getCanvasCoordinates(event);
+        drawLine(position);
+      }
+
+      function getCanvasCoordinates(event) {
+        var x = event.clientX -canvas.getBoundingClientRect().left;
+        var y = event.clientY -canvas.getBoundingClientRect().top;
+        return {x: x, y: y};
+      }
+    };
+
+  </script>
+  </body>
+</html>
+
