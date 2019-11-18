@@ -45,28 +45,23 @@ function create_points(xPos, yPos) {
     }
     storePointsCoordinates.push({x : this.x, y : this.y});
     drawLine();
-    drawPoints(this.x , this.y);
 		
     /* console.log('particle created at: ' + this.x + ', ' + this.y); */
 
 }
 //draw coordinates
-function drawPoints(x,y){	
+function drawCoordinates(x,y){	
   	let ctx = document.getElementById("canvas").getContext("2d");
 
 
   	ctx.fillStyle = "#ff2626"; // Red color
 
     ctx.beginPath();
-		
-    for(let i = 0; i < storePointsCoordinates.length; i++ ){
-  	ctx.arc(storePointsCoordinates[i].x , storePointsCoordinates[i].y , pointSize, 0, Math.PI * 2, true);
+    ctx.arc(x, y, pointSize, 0, Math.PI * 2, true);
     ctx.fill();
-    ctx.closePath()
-  }
-  
 }
 function drawLine() {
+console.log("line not made");
 	/* let ctx = document.getElementById("canvas").getContext("2d"); */
   ctx.beginPath();
   ctx.moveTo(storePointsCoordinates[0].x ,storePointsCoordinates[0].y);
@@ -80,16 +75,15 @@ function drawLine() {
 //close path 
 function closeLine() {
 if (storePointsCoordinates.length > 2) {
-	/* let ctx = document.getElementById("canvas").getContext("2d"); */
+	let ctx = document.getElementById("canvas").getContext("2d");
   ctx.closePath((storePointsCoordinates[0].x ,storePointsCoordinates[0].y), (storePointsCoordinates[storePointsCoordinates.length -1].x ,storePointsCoordinates[storePointsCoordinates.length -1].y)  );
   redraw();
 	} 
 }
 
 function redraw() {
-/* let ctx = document.getElementById("canvas").getContext("2d") */;
+let ctx = document.getElementById("canvas").getContext("2d");
 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 }
 // When the canvas is clicked
 // add new particle
@@ -110,7 +104,7 @@ function getPosition(e) {
          );  */
      create_points(mouseXpos, mouseYpos);
      
-    /* drawPoints(mouseXpos, mouseYpos); */
+    drawCoordinates(mouseXpos, mouseYpos);
 
 }
 

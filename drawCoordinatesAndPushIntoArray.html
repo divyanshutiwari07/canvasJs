@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>canvas Tutorial</title>
+    <!-- <link href='style.css' rel='stylesheet' media='all'> -->
+    <!-- <script src='test.js'></script> -->
+  </head>
+  <body>
+  <canvas id="canvas" width="800" height="600" style="border:1px solid #d3d3d3;"> 
+      
+  </canvas>
+  <button type="button" onclick="myFunction()">click</button>
+  <script>
+
+    /**
+ * creates canvas
+ */
+function create_canvas() {
+    var canvas_html = document.createElement('canvas');
+    canvas_html.id = "canvas";
+    canvas_html.width = 600;
+    canvas_html.height = 440;
+    canvas_html.onclick="getCoords(event)"
+
+    document.getElementById("canva_res").appendChild(canvas_html);
+
+    return canvas_html.getContext('2d');
+}
+
+/**
+ * 
+draws coordinate axes
+ */
+function drawCoordLines() {
+    canvas.beginPath();
+    canvas.strokeStyle = '#fff';
+    canvas.moveTo(300, 0);
+    canvas.lineTo(300, 440);
+    canvas.moveTo(0, 220);
+    canvas.lineTo(600, 220);
+    canvas.stroke();
+    for (var x = 0.5; x < 610; x += 10) {
+canvas.moveTo(x, 0);
+canvas.lineTo(x, 450);
+}
+for (var y = 0.5; y < 450; y += 10) {
+canvas.moveTo(0, y);
+canvas.lineTo(600, y);
+}canvas.strokeStyle = "#1abc9c";
+canvas.stroke();
+    canvas.closePath();
+}
+
+/**
+ *draws a shell
+ */
+function drawHull() {
+
+    canvas.beginPath();
+    canvas.strokeStyle = '#fff';
+    canvas.moveTo(300 + points[ h[0] ].x, 220 - points[ h[0] ].y);
+    for(var i=1; i<h.length; i++){
+        canvas.lineTo(300 + points[ h[i] ].x, 220 - points[ h[i] ].y);
+    }
+
+    canvas.closePath();
+    canvas.stroke();
+}
+
+/**
+ *draws dots
+ */
+function drawPoints() {
+
+    canvas.fillStyle = '#000';
+    for(var i=0; i<points.length; i++){
+        canvas.beginPath();
+        canvas.arc(300 + points[i].x, 220 - points[i].y, 3, 0, Math.PI * 2); // рисует точку
+        canvas.closePath();
+        canvas.fill();
+    }
+
+
+}
+
+/**
+ * 
+updates and redraws canvas
+ */
+function update() {
+    canvas.clearRect(0, 0, 1500, 800); // 
+clean the canvas
+    drawCoordLines();
+    drawHull();
+    drawPoints();
+}
+
+/**
+ * 
+reads points from a form
+ */
+function getPoints() {
+    // we get the string entered into the form, and write to the array, breaking it by comma
+    var coords = pointsV.value.split(", ");
+    var i = 0;
+    var j = 0;
+    points = [];
+    ch = [];
+    while (i < coords.length) {
+        points[j++] = {
+            'x': parseInt(coords[i++]),
+            'y': parseInt(coords[i++])
+        }
+        ch.push(j-1);
+    }
+    graham();
+}
+
+/**
+ * 
+returns vector product
+ */
+function classify(vector, x1, y1) {
+    return pr = (vector.x2 - vector.x1) * (y1 - vector.y1) - (vector.y2 - vector.y1) * (x1 - vector.x1);
+}
+
+/**
+ * Searches for Graham and fills the h array, which lists the points in the shell
+ */
+function graham() {
+    var minI = 0; // bottom left point number
+    var min = points[0].x;
+    // looking for the bottom left point
+    for (var i = 1; i < points.length; i++) {
+        if (points[i].x < min) {
+            min = points[i].x;
+            minI = i;
+        }
+    }
+    // make the bottom left point active
+    ch[0] = minI;
+    ch[minI] = 0;
+
+    // sort the vertices in the order of "left"
+    for (var i = 1; i < ch.length - 1; i++) {
+        for (var j = i + 1; j < ch.length; j++) {
+            var cl = classify({
+                'x1': points[ ch[0] ].x,
+                'y1': points[ ch[0] ].y,
+                'x2': points[ ch[i] ].x,
+                'y2': points[ ch[i] ].y
+            }, points[ ch[j] ].x, points[ ch[j] ].y) // classify function counts a vector product.
+
+            // if the vector product is less than 0, then the vertex j is to the left of the vertex i. We swap them
+            if (cl < 0) {
+                temp = ch[i];
+                ch[i] = ch[j];
+                ch[j] = temp;
+            }
+        }
+    }
+
+    //write to the stack vertices that exactly fit into the shell
+    h = [];
+    h[0] = ch[0];
+    h[1] = ch[1];
+
+
+    for (var i = 2; i < ch.length; i++) {
+        while (classify({
+            'x1': points[ h[h.length - 2] ].x,
+            'y1': points[ h[h.length - 2] ].y,
+            'x2': points[ h[h.length - 1] ].x,
+            'y2': points[ h[h.length - 1] ].y
+        }, points[ ch[i] ].x, points[ ch[i] ].y) < 0) {
+            h.pop(); // while there is a right turn, remove the point from the shell
+        }
+        h.push(ch[i]); // add a new point to the shell
+    }
+
+    // updating canvas
+    update();
+}
+
+/**
+ * executed when the page is fully loaded in the browser
+ */
+window.onload = function() {
+    canvas = create_canvas();
+
+    // array of points from which we construct the convex hull
+    points = [{
+            'x': 10,
+            'y': 20
+        }, {
+            'x': 60,
+            'y': 160
+        }, {
+            'x': 110,
+            'y': 20
+        }, {
+            'x': -60,
+            'y': 80
+        },
+        {
+            'x': 70,
+            'y': 140
+        }];
+
+    // array of point numbers required for Graham's algorithm
+    ch = [0, 1, 2, 3, 4];
+
+    // the desired shell will be filled with the graham function
+    h = []
+
+    // we get the input form
+    pointsV = document.getElementById('pointos');
+    graham();
+
+document.getElementById('canvas').onclick = function(e) {
+  var x;
+  var y;
+   if (e.pageX || e.pageY) { 
+      x = e.pageX;
+      y = e.pageY;
+   }else { 
+      x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
+      y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
+   } 
+   x -= this.offsetLeft;
+   y -= this.offsetTop;
+  points.push({x:x,y:y});// i think you need relative positions here...
+  ch.push(ch.length);//thats all... no need for a counter...
+
+  graham();
+}
+}
+
+
+  </script>
+  </body>
+</html>
+

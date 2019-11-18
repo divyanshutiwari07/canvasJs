@@ -90,7 +90,7 @@ mouse.start(canvas);
 function draw() {
     ctx.drawImage(baseImage, 0, 0, ctx.canvas.width, ctx.canvas.width);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = "green";
     storedRects.forEach(rect => rect.draw(ctx));
     ctx.strokeStyle = "red";
     rect.draw(ctx);
